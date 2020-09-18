@@ -82,16 +82,16 @@ if __name__ == "__main__":
     if 'xml' in file_path:
         m_filter_fn = large_file_filter_fn
         # partition_size = 300
-        App_name = 'Part3-t2-large-partition-%d' % partition_size
+        App_name = 'Part3-t2-large-partition-' + str(partition_size)
     else:
         m_filter_fn = small_file_filter_fn
         # partition_size = 5
-        App_name = 'Part3-t2-small-partition-%d' % partition_size
+        App_name = 'Part3-t2-small-partition-' + str(partition_size)
 
     conf = SparkConf().setAppName(
         App_name).setMaster(master).set("spark.local.dir", "/mnt/data/").set("spark.eventLog.enabled", "true").set("spark.eventLog.dir", "file:///users/yunjia/spark_log/").set("spark.executor.cores", "5")
     sc = SparkContext(conf=conf)
-    lines = sc.textFile(file_path).repartition(partition_size)
+    lines = sc.textFile(file_path).repartition(int(partition_size))
 
     rank = calculate_page_rank(lines, m_filter_fn)
 

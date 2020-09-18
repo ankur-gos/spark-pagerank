@@ -58,12 +58,12 @@ def calculate_page_rank(lines, m_filter_fn):
     distinct() is to filter out the duplicate edges
     """
     neighbors = lines.filter(m_filter_fn).map(
-        map_pairs_fn).distinct().groupByKey()
+        map_pairs_fn).distinct().groupByKey().cache()
 
     """
     Set default pagerank to 1
     """
-    rank = neighbors.mapValues(lambda rank: 1)
+    rank = neighbors.mapValues(lambda rank: 1).cache()
 
     for i in range(10):
         """ 
