@@ -1,0 +1,1 @@
+spark-submit sort.py hdfs://10.10.1.1:9000/input/export.csv hdfs://10.10.1.1:9000/output/result
