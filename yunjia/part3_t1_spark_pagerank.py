@@ -15,9 +15,9 @@ def large_file_filter_fn(line):
         return False
     elif len(tokens) > 2:
         return False
-    elif ":" in tokens[0] and "category:" not in tokens[0]:
+    elif ":" in tokens[0] and "category:" not in tokens[0].lower():
         return False
-    elif ":" in tokens[1] and "category:" not in tokens[1]:
+    elif ":" in tokens[1] and "category:" not in tokens[1].lower():
         return False
     else:
         return True
@@ -47,16 +47,11 @@ def flatMap_fn(line):
     return scores
 
 
-# def add_ranks():
-#     return add
-
-
 def calculate_page_rank(lines, file_filter_fn):
     """
     Filter out the data that is not useful
     map lines into pairs of nodes
     """
-    # remove .distinct()
     neighbors = lines.filter(file_filter_fn).map(
         map_pairs_fn).distinct().groupByKey()
 
@@ -81,9 +76,12 @@ if __name__ == "__main__":
     file_path = argv[2]
     save_path = argv[3]
 
-    if 'xml' in file_path:
+    print("file_path = ", file_path)
+    print("save_path = ", save_path)
+
+    if 'xml' in file_path or 'wiki' in file_path:
         m_filter_fn = large_file_filter_fn
-        partition_size = 300
+        partition_size = 500
         App_name = 'Part3-t1-large-partition-%d' % partition_size
     else:
         m_filter_fn = small_file_filter_fn
@@ -91,12 +89,13 @@ if __name__ == "__main__":
         App_name = 'Part3-t1-small-partition-%d' % partition_size
 
     conf = SparkConf().setAppName(
-        App_name).setMaster(master).set("spark.local.dir", "/mnt/data/").set("spark.eventLog.enabled", "true").set("spark.eventLog.dir", "file:///users/yunjia/spark_log/").set("spark.executor.cores", "5")
+        App_name).setMaster(master).set("spark.local.dir", "/mnt/data/tmp/").set("spark.eventLog.enabled", "true").set("spark.driver.memory", "25g").set("spark.executor.memory", "25g").set("spark.executor.cores", "5").set("spark.tmp.dir", "/mnt/data/tmp/").set("spark.eventLog.dir", "file:///users/yunjia/spark_log/")
     sc = SparkContext(conf=conf)
 
     lines = sc.textFile(file_path).repartition(partition_size)
 
     print("Total partition: ", lines.getNumPartitions())
+    print("Tmp dir: ", conf.get('spark.tmp.dir'))
 
     rank = calculate_page_rank(lines, m_filter_fn)
 
